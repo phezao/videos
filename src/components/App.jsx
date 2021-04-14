@@ -1,18 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchBar from "./SearchBar";
 import youtube from '../apis/youtube';
 import VideoList from './VideoList';
 import VideoDetail from './VideoDetail';
 
-class App extends React.Component{
+const App = () => {
+  const [videos, setVideos] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
 
-  state = {videos: [], selectedVideo: null}
+  useEffect(() => {
+    onSubmit('rocket league')
+  }, [])
 
-  componentDidMount(){
-    this.onSubmit('rocket league')
-  }
 
-  onSubmit = async term => {
+  const onSubmit = async term => {
    const response = await youtube.get('/search', {
       params: {
         q: term
@@ -20,33 +21,32 @@ class App extends React.Component{
     })
     console.log(response.data.items);
 
-    this.setState({videos: response.data.items, selectedVideo: response.data.items[0]});
+    setVideos(response.data.items)
+    setSelectedVideo(response.data.items[0])
 
   }
 
-  onVideoSelect = (video) => {
+  const onVideoSelect = (video) => {
     console.log(video);
-    this.setState({selectedVideo: video})
+    setSelectedVideo(video)
   }
 
-  render(){
-    return (
-      <div className="ui container" style={{marginTop: '30px'}}>
-        <SearchBar onSubmit={this.onSubmit} />
+  return (
+    <div className="ui container" style={{marginTop: '30px'}}>
+        <SearchBar onSubmit={onSubmit} />
         <div className="ui grid">
           <div className="ui row">
             <div className="eleven wide column">
-              <VideoDetail video={this.state.selectedVideo} />
+              <VideoDetail video={selectedVideo} />
             </div>
             <div className="five wide column">
-              <VideoList videos={this.state.videos} onVideoSelect={this.onVideoSelect} />
+              <VideoList videos={videos} onVideoSelect={onVideoSelect} />
             </div>
           </div>
         </div>
-        <p>Found {this.state.videos.length} videos</p>
+        <p>Found {videos.length} videos</p>
       </div>
     )
-  }
 }
 
 
